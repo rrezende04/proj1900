@@ -1,0 +1,8 @@
+dbt;
+sgo 69;
+sar;
+mav 255;
+dal 2;
+det;
+trg;
+fin;

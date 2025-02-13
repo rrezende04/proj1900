@@ -1,0 +1,23 @@
+dbt;
+dbc 2;
+sgo 74;
+att 6;
+sar;
+fbc;
+sgo 74;
+att 18;
+sgo 70;
+att 18;
+sgo 72;
+att 18;
+sgo 74;
+att 6;
+sar;
+att 6;
+sgo 72;
+att 6;
+sgo 74;
+att 55;
+sar;
+fin;
+
