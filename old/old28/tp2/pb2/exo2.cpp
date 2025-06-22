@@ -50,49 +50,51 @@ Tableau des etats du programme, avec sortie sur la LED
 #include <avr/io.h> 
 #include <util/delay.h>
 
-
-void turnLedOff()        // 00
-{
-    PORTA &= ~(1 <<PA1); // 0x
-    PORTA &= ~(1 <<PA0); // x0
-}
-
-void turnLedGreen()     // 01
-{
-    PORTA &= ~(1 << PA1); // 0x
-    PORTA |= (1 << PA0);  // x1
-}
-
-void turnLedRed()        // 10
-{
-    PORTA |= (1 << PA1);   // 1x
-    PORTA &= ~(1 << PA0);  // x0
-}
-
-
-void turnLedAmber() // Ambre pour 8 ms
-{
-    turnLedRed();
-    _delay_ms(2);
-    turnLedGreen();
-    _delay_ms(5);
-}
-
-bool debounceButton() // Bouton est en PD2
-{
-    if (PIND & (1 << PD2))
-    {
-        _delay_ms(10);
-        return (PIND & (1 << PD2));
-    }
-    return false;
-}
+static constexpr uint8_t DEBOUNCE_DELAY = 10;
+static constexpr uint8_t RED_DELAY_MS   = 2;
+static constexpr uint8_t GREEN_DELAY_MS = 5;
 
 void initializePorts()
 {
     DDRA |= ( 1 << PA1); // PA1 sortie
     DDRA |= ( 1 << PA0); // PA0 sortie
     DDRD &= ~(1 << PD2); // PD2 entree
+}
+
+void turnLedOff()        
+{
+    PORTA &= ~(1 << PA1);
+    PORTA &= ~(1 << PA0);
+}
+
+void turnLedGreen()   
+{
+    PORTA &= ~(1 << PA1);
+    PORTA |=  (1 << PA0);
+}
+
+void turnLedRed()      
+{
+    PORTA |=  (1 << PA1); 
+    PORTA &= ~(1 << PA0);
+}
+
+void turnLedAmber() // Ambre pour 7 ms (+ temps des instructions)
+{
+    turnLedRed();
+    _delay_ms(RED_DELAY_MS);
+    turnLedGreen();
+    _delay_ms(GREEN_DELAY_MS);
+}
+
+bool debounceButton() // Bouton est en PD2
+{
+    if (PIND & (1 << PD2))
+    {
+        _delay_ms(DEBOUNCE_DELAY);
+        return (PIND & (1 << PD2));
+    }
+    return false;
 }
 
 enum class State {INIT, ON1, OFF1, ON2, OFF2, ON3};

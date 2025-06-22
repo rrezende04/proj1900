@@ -48,34 +48,43 @@ Tableau des etats du programme, avec sortie sur la LED
 #include <avr/io.h> 
 #include <util/delay.h>
 
+static constexpr uint8_t  DEBOUNCE_DELAY      = 10;
+static constexpr uint16_t FINAL_ROUTINE_DELAY = 2000;
 
-void turnLedOff()        // 00
+void initializePorts()
 {
-    PORTA &= ~(1 <<PA1); // 0x
-    PORTA &= ~(1 <<PA0); // x0
+    DDRA |=  (1 << PA1); // PA1 sortie
+    DDRA |=  (1 << PA0); // PA0 sortie
+    DDRD &= ~(1 << PD2); // PD2 entree
+}
+
+void turnLedOff()         // 00
+{
+    PORTA &= ~(1 << PA1); // 0x
+    PORTA &= ~(1 << PA0); // x0
 }
 
 void turnLedGreen()       // 01
 {
     PORTA &= ~(1 << PA1); // 0x
-    PORTA |= (1 << PA0);  // x1
+    PORTA |=  (1 << PA0); // x1
 }
 
 bool debounceButton() // Bouton est en PD2
 {
     if (PIND & (1 << PD2))
     {
-        _delay_ms(10);
+        _delay_ms(DEBOUNCE_DELAY);
         return (PIND & (1 << PD2));
     }
     return false;
 }
 
-void initializePorts()
+void finalStateRoutine()
 {
-    DDRA |= ( 1 << PA1); // PA1 sortie
-    DDRA |= ( 1 << PA0); // PA0 sortie
-    DDRD &= ~(1 << PD2); // PD2 entree
+    turnLedGreen();
+    _delay_ms(FINAL_ROUTINE_DELAY);
+    turnLedOff();
 }
 
 enum class State {INIT, ON1, OFF1, ON2, OFF2, ON3, OFF3};
@@ -86,37 +95,37 @@ int main()
 
     // Initialize state and button press status
     State state = State::INIT;
-    bool isPressedButton = false;
+    bool isButtonPressed = false;
 
-    // Machine a etat
+    // State machine
     while (true)
     {   
-        isPressedButton = debounceButton();
+        // Update button state on every press
+        isButtonPressed = debounceButton();
+
         switch (state)
         {
             case State::INIT :
-                if (isPressedButton) state = State::ON1;
+                if (isButtonPressed) state = State::ON1;
                 break;
             case State::ON1 :
-                if (!(isPressedButton)) state = State::OFF1;
+                if (!(isButtonPressed)) state = State::OFF1;
                 break;
             case State::OFF1 :
-                if (isPressedButton) state = State::ON2;
+                if (isButtonPressed) state = State::ON2;
                 break;
             case State::ON2 :
-                if (!(isPressedButton)) state = State::OFF2;
+                if (!(isButtonPressed)) state = State::OFF2;
                 break;
             case State::OFF2 :
-                if (isPressedButton) state = State::ON3;
+                if (isButtonPressed) state = State::ON3;
                 break;
             case State::ON3 :
-                if (!(isPressedButton)) state = State::OFF3;
+                if (!(isButtonPressed)) state = State::OFF3;
                 break;
             case State::OFF3 :
-                turnLedGreen();
-                _delay_ms(2000);
+                finalStateRoutine();
                 state = State::INIT;
-                turnLedOff();
                 break;
         }
     }
