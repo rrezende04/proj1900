@@ -1,0 +1,15 @@
+VM no wifi: 
+	Task manager
+	Services
+	Restart "VMWare NAT service"
+
+Wheel issues:
+	Check H-Bridge GND
+	Check pins (E: enable, D: direction)
+	Check power source
+
+Wheel spins on its own:
+	Check that a wire connected to an OUTPUT is plugged into enable
+	Some robots might have tendency to stabilize towards 1 rather than 0
+
+
