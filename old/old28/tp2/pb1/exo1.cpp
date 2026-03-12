@@ -48,33 +48,36 @@ Tableau des etats du programme, avec sortie sur la LED
 #include <avr/io.h> 
 #include <util/delay.h>
 
-static constexpr uint8_t  DEBOUNCE_DELAY      = 10;
-static constexpr uint16_t FINAL_ROUTINE_DELAY = 2000;
+static constexpr uint8_t  DEBOUNCE_DELAY_MS      = 10;
+static constexpr uint16_t FINAL_ROUTINE_DELAY_MS = 2000;
 
 void initializePorts()
 {
-    DDRA |=  (1 << PA1); // PA1 sortie
-    DDRA |=  (1 << PA0); // PA0 sortie
-    DDRD &= ~(1 << PD2); // PD2 entree
+    // LED
+    DDRA |=  (1 << PA1);
+    DDRA |=  (1 << PA0);
+
+    // Button
+    DDRD &= ~(1 << PD2);
 }
 
-void turnLedOff()         // 00
+void turnLedOff()        
 {
-    PORTA &= ~(1 << PA1); // 0x
-    PORTA &= ~(1 << PA0); // x0
+    PORTA &= ~(1 << PA1);
+    PORTA &= ~(1 << PA0);
 }
 
-void turnLedGreen()       // 01
+void turnLedGreen()      
 {
-    PORTA &= ~(1 << PA1); // 0x
-    PORTA |=  (1 << PA0); // x1
+    PORTA &= ~(1 << PA1);
+    PORTA |=  (1 << PA0);
 }
 
-bool debounceButton() // Bouton est en PD2
+bool readButton()
 {
     if (PIND & (1 << PD2))
     {
-        _delay_ms(DEBOUNCE_DELAY);
+        _delay_ms(DEBOUNCE_DELAY_MS);
         return (PIND & (1 << PD2));
     }
     return false;
@@ -83,7 +86,7 @@ bool debounceButton() // Bouton est en PD2
 void finalStateRoutine()
 {
     turnLedGreen();
-    _delay_ms(FINAL_ROUTINE_DELAY);
+    _delay_ms(FINAL_ROUTINE_DELAY_MS);
     turnLedOff();
 }
 
@@ -101,7 +104,7 @@ int main()
     while (true)
     {   
         // Update button state on every press
-        isButtonPressed = debounceButton();
+        isButtonPressed = readButton();
 
         switch (state)
         {

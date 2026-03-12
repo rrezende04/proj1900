@@ -50,15 +50,18 @@ Tableau des etats du programme, avec sortie sur la LED
 #include <avr/io.h> 
 #include <util/delay.h>
 
-static constexpr uint8_t DEBOUNCE_DELAY = 10;
-static constexpr uint8_t RED_DELAY_MS   = 2;
-static constexpr uint8_t GREEN_DELAY_MS = 5;
+static constexpr uint8_t DEBOUNCE_DELAY_MS  = 10;
+static constexpr uint8_t RED_DELAY_MS       = 2;
+static constexpr uint8_t GREEN_DELAY_MS     = 5;
 
 void initializePorts()
 {
-    DDRA |= ( 1 << PA1); // PA1 sortie
-    DDRA |= ( 1 << PA0); // PA0 sortie
-    DDRD &= ~(1 << PD2); // PD2 entree
+    // LED
+    DDRA |= ( 1 << PA1);
+    DDRA |= ( 1 << PA0);
+
+    // Button
+    DDRD &= ~(1 << PD2);
 }
 
 void turnLedOff()        
@@ -79,7 +82,11 @@ void turnLedRed()
     PORTA &= ~(1 << PA0);
 }
 
-void turnLedAmber() // Ambre pour 7 ms (+ temps des instructions)
+/**
+ * Turns LED amber for roughly 7ms
+ * Use in loop to keep amber
+ */
+void turnLedAmber()
 {
     turnLedRed();
     _delay_ms(RED_DELAY_MS);
@@ -87,11 +94,11 @@ void turnLedAmber() // Ambre pour 7 ms (+ temps des instructions)
     _delay_ms(GREEN_DELAY_MS);
 }
 
-bool debounceButton() // Bouton est en PD2
+bool readButton()
 {
     if (PIND & (1 << PD2))
     {
-        _delay_ms(DEBOUNCE_DELAY);
+        _delay_ms(DEBOUNCE_DELAY_MS);
         return (PIND & (1 << PD2));
     }
     return false;
@@ -107,10 +114,10 @@ int main()
     State state = State::INIT;
     bool isPressedButton = false;
 
-    // Machine a etat
+    // State machine
     while (true)
     {   
-        isPressedButton = debounceButton();
+        isPressedButton = readButton();
         switch (state)
         {
             case State::INIT :
