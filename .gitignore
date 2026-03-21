@@ -1,5 +1,7 @@
-.d
-.elf
-.hex
-.o
-.vscode
+*.d
+*.elf
+*.hex
+*.o
+*.vscode
+*.a
+*.map
